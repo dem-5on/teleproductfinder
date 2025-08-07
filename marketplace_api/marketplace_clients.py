@@ -20,11 +20,29 @@ class TemuClient(MarketplaceClient):
             return None
 
         price = item.get('price', 'N/A')
-        url = item.get('productUrl', '')
+        
+        # Try different URL fields that might be present in the response
+        url = (item.get('productUrl') or 
+               item.get('url') or 
+               item.get('link') or
+               item.get('product_url') or
+               item.get('detailUrl') or
+               '')
 
         if not url:
-            logger.debug(f"Skipping Temu product missing URL: {title}")
-            return None
+            # Construct URL using product ID if available
+            product_id = item.get('id') or item.get('productId') or item.get('product_id')
+            if product_id:
+                url = f"https://www.temu.com/p/{product_id}.html"
+            else:
+                logger.debug(f"Skipping Temu product missing URL: {title}")
+                return None
+
+        # Clean up the price if needed
+        if isinstance(price, (dict, list)):
+            price = str(price.get('value', 'N/A')) if isinstance(price, dict) else str(price[0] if price else 'N/A')
+        price = str(price).strip('$')  # Remove dollar sign if present
+        price = f"${price}" if price != 'N/A' else price  # Add dollar sign back if it's a valid price
 
         review_data = self._process_review_data(item)
 
