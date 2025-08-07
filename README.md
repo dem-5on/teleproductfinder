@@ -1,8 +1,8 @@
-# SmartShopperBot - Amazon Best Deal Finder
+# SmartShopperBot - Online Shops Best Deal Finder
 
 ## Project Overview
 
-The **SmartShopperBot** is a Telegram bot that helps you find the best deals for products on **Amazon**. The bot takes in the product description or name and, optionally, the region (Amazon country domain). It then compares listings from multiple sellers and returns the **best deal** based on **price**, **reviews**, **ratings**, **delivery time**, and more. If no region is provided, the bot defaults to **amazon.com** (USA).
+The **SmartShopperBot** is a Telegram bot that helps you find the best deals for products on **Amazon, temu, alibaba, jumia**. The bot takes in the product description or name and, optionally, the region (eg. Amazon country domain). It then compares listings from multiple sellers and returns the **best deal** based on **price**, **reviews**, **ratings**, **delivery time**, and more. If no region is provided, the bot defaults to **amazon.com** (USA).
 
 ## How to Run the Bot
 
