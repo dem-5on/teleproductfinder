@@ -5,53 +5,57 @@ logger = logging.getLogger(__name__)
 
 class TemuClient(MarketplaceClient):
     def __init__(self):
-        super().__init__("amit123/temu-products-scraper")
+        super().__init__("LTBzVVq592mKgR6lU")
 
     def _prepare_actor_input(self, search_query):
         return {
-            "searchQueries": [search_query],
-            "maxProducts": 20
+            "keyword": search_query,
+            "maxItems": 20,
+            "getReviews": True,
+            "getImages": False  # Skip images to improve performance
         }
 
     def _process_item(self, item):
-        title = item.get('title', '')
+        title = item.get('name', '')
         if not title:
             logger.debug("Skipping Temu product with no title")
             return None
 
-        price = item.get('price', 'N/A')
+        # Get price information
+        original_price = item.get('originalPrice', {}).get('value')
+        current_price = item.get('salePrice', {}).get('value')
         
-        # Try different URL fields that might be present in the response
-        url = (item.get('productUrl') or 
-               item.get('url') or 
-               item.get('link') or
-               item.get('product_url') or
-               item.get('detailUrl') or
-               '')
+        # Use the sale price if available, otherwise use original price
+        price = current_price or original_price
+        if price is None:
+            price = 'N/A'
+        else:
+            price = f"${price}"
 
+        # Get product URL
+        url = item.get('url', '')
         if not url:
-            # Construct URL using product ID if available
-            product_id = item.get('id') or item.get('productId') or item.get('product_id')
+            product_id = item.get('id')
             if product_id:
-                url = f"https://www.temu.com/p/{product_id}.html"
+                url = f"https://www.temu.com/{product_id}.html"
             else:
                 logger.debug(f"Skipping Temu product missing URL: {title}")
                 return None
 
-        # Clean up the price if needed
-        if isinstance(price, (dict, list)):
-            price = str(price.get('value', 'N/A')) if isinstance(price, dict) else str(price[0] if price else 'N/A')
-        price = str(price).strip('$')  # Remove dollar sign if present
-        price = f"${price}" if price != 'N/A' else price  # Add dollar sign back if it's a valid price
-
-        review_data = self._process_review_data(item)
+        # Process review information
+        reviews = item.get('reviews', [])
+        rating = item.get('rating', {}).get('value')
+        review_count = len(reviews) if reviews else item.get('reviewsCount', 0)
 
         return {
             'title': title,
             'price': price,
             'url': url,
             'marketplace': 'Temu',
-            **review_data
+            'rating': rating if rating is not None else 0,
+            'review_count': review_count,
+            'shipping': item.get('shipping', {}).get('deliveryDays', 'N/A'),
+            'seller': item.get('seller', {}).get('name', 'Temu')
         }
 
 class JumiaClient(MarketplaceClient):
