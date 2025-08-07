@@ -1,4 +1,5 @@
 import logging
+import json
 from .base_client import MarketplaceClient
 
 logger = logging.getLogger(__name__)
@@ -17,46 +18,74 @@ class TemuClient(MarketplaceClient):
         }
 
     def _process_item(self, item):
-        title = item.get('name', '')
+        # Debug the item structure
+        logger.debug(f"Processing Temu item: {json.dumps(item, indent=2)}")
+        
+        # Get the title from various possible fields
+        title = (item.get('title') or 
+                item.get('name') or 
+                item.get('productName') or
+                item.get('product_name') or
+                '')
+                
         if not title:
             logger.debug("Skipping Temu product with no title")
             return None
 
         # Get price information
-        original_price = item.get('originalPrice', {}).get('value')
-        current_price = item.get('salePrice', {}).get('value')
-        
-        # Use the sale price if available, otherwise use original price
-        price = current_price or original_price
+        price = item.get('price')
+        if isinstance(price, dict):
+            price = price.get('value', 'N/A')
+        if not price or price == 'N/A':
+            price = item.get('salePrice', {}).get('value') or item.get('originalPrice', {}).get('value')
         if price is None:
             price = 'N/A'
         else:
-            price = f"${price}"
+            price = f"${price}" if not str(price).startswith('$') else str(price)
 
         # Get product URL
-        url = item.get('url', '')
+        url = (item.get('url') or 
+               item.get('productUrl') or
+               item.get('link') or
+               '')
+               
+        if not url and (product_id := (item.get('id') or item.get('productId'))):
+            url = f"https://www.temu.com/product/{product_id}.html"
+        
         if not url:
-            product_id = item.get('id')
-            if product_id:
-                url = f"https://www.temu.com/{product_id}.html"
-            else:
-                logger.debug(f"Skipping Temu product missing URL: {title}")
-                return None
+            logger.debug(f"Skipping Temu product missing URL: {title}")
+            return None
 
         # Process review information
-        reviews = item.get('reviews', [])
-        rating = item.get('rating', {}).get('value')
-        review_count = len(reviews) if reviews else item.get('reviewsCount', 0)
+        rating = 0
+        review_count = 0
+        
+        if isinstance(item.get('rating'), dict):
+            rating = float(item['rating'].get('value', 0))
+        elif isinstance(item.get('rating'), (int, float)):
+            rating = float(item['rating'])
+            
+        if 'reviews' in item and isinstance(item['reviews'], list):
+            review_count = len(item['reviews'])
+        elif 'reviewsCount' in item:
+            review_count = int(item['reviewsCount'])
+
+        shipping = 'N/A'
+        if 'shipping' in item:
+            if isinstance(item['shipping'], dict):
+                shipping = item['shipping'].get('deliveryDays', 'N/A')
+            elif isinstance(item['shipping'], str):
+                shipping = item['shipping']
 
         return {
             'title': title,
             'price': price,
             'url': url,
             'marketplace': 'Temu',
-            'rating': rating if rating is not None else 0,
+            'rating': rating,
             'review_count': review_count,
-            'shipping': item.get('shipping', {}).get('deliveryDays', 'N/A'),
-            'seller': item.get('seller', {}).get('name', 'Temu')
+            'shipping': shipping,
+            'seller': 'Temu'  # Default to Temu as seller
         }
 
 class JumiaClient(MarketplaceClient):
