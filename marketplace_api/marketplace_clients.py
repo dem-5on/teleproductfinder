@@ -9,7 +9,7 @@ class TemuClient(MarketplaceClient):
 
     def _prepare_actor_input(self, search_query):
         return {
-            "searchTerm": search_query,
+            "searchQueries": [search_query],
             "maxProducts": 20
         }
 
