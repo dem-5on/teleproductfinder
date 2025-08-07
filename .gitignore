@@ -7,4 +7,4 @@ __pycache__/
 *.pkl
 *.db
 *.sqlite3
-*.log
+*.log.env
