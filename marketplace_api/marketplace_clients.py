@@ -9,10 +9,11 @@ class TemuClient(MarketplaceClient):
 
     def _prepare_actor_input(self, search_query):
         return {
-            "keyword": search_query,
+            "searchQueries": [search_query],
             "maxItems": 20,
             "getReviews": True,
-            "getImages": False  # Skip images to improve performance
+            "saveImages": False,  # Skip images to improve performance
+            "saveVideos": False   # Skip videos to improve performance
         }
 
     def _process_item(self, item):
