@@ -1,50 +1,117 @@
-# SmartShopperBot - Online Shops Best Deal Finder
+# SmartShopperBot - Multi-Marketplace Deal Finder
 
 ## Project Overview
 
-The **SmartShopperBot** is a Telegram bot that helps you find the best deals for products on **Amazon, temu, alibaba, jumia**. The bot takes in the product description or name and, optionally, the region (eg. Amazon country domain). It then compares listings from multiple sellers and returns the **best deal** based on **price**, **reviews**, **ratings**, **delivery time**, and more. If no region is provided, the bot defaults to **amazon.com** (USA).
+The **SmartShopperBot** is a Telegram bot that helps you find the best deals across multiple online marketplaces. Currently supported platforms include:
+- Amazon (via Apify scraping)
+- Temu
+- Jumia
+- Alibaba
+
+The bot takes your product description or name and searches across these platforms to find the best deals. It compares listings based on various factors including:
+- Price
+- Reviews and ratings
+- Delivery time and cost
+- Seller reputation
+- Platform reliability
+
+## Features
+
+- 🌍 **Multi-Marketplace Support**: Search across multiple e-commerce platforms simultaneously
+- 💬 **Conversational Interface**: Natural language processing for better search understanding
+- 🔍 **Smart Filtering**: Advanced algorithms to find genuine deals and filter out unreliable listings
+- 📊 **Comparative Analysis**: Side-by-side comparison of deals across different platforms
+- 🚀 **Docker Support**: Easy deployment using Docker containers
 
 ## How to Run the Bot
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/smartshopper-bot.git
-    cd smartshopper-bot
-    ```
+### Using Docker (Recommended)
 
-2.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/dem-5on/teleproductfinder.git
+   cd teleproductfinder
+   ```
 
-3.  **Set up your environment variables:**
+2. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
 
-    Create a `.env` file in the `smartshopper_bot` directory and add your credentials:
-    ```
-    TELEGRAM_BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
-    AMAZON_ACCESS_KEY=YOUR_AMAZON_ACCESS_KEY
-    AMAZON_SECRET_KEY=YOUR_AMAZON_SECRET_KEY
-    AMAZON_ASSOCIATE_TAG=YOUR_AMAZON_ASSOCIATE_TAG
-    ```
+3. **Build and run with Docker Compose:**
+   ```bash
+   docker-compose up --build
+   ```
 
-4.  **Run the bot:**
-    ```bash
-    python main.py
-    ```
+### Manual Installation
 
-## Folder Structure
+1. **Clone and setup:**
+   ```bash
+   git clone https://github.com/dem-5on/teleproductfinder.git
+   cd teleproductfinder
+   python -m venv env
+   source env/bin/activate  # On Windows: .\env\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+2. **Configure environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
+
+3. **Run the bot:**
+   ```bash
+   python main.py
+   ```
+
+## Environment Variables
+
+The following environment variables need to be set in your .env file:
+
+```bash
+# Required
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+APIFY_API_TOKEN=your_apify_token_here
+
+# Optional (for Amazon Product API)
+AWS_ACCESS_KEY_ID=your_aws_access_key_here
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key_here
+AWS_ASSOCIATE_TAG=your_amazon_associate_tag_here
+AWS_REGION=your_aws_region_here
+```
+
+## Project Structure
 
 ```
-smartshopper_bot/
-├── main.py                    # Main file handling bot commands and logic
+├── Dockerfile              # Container configuration
+├── docker-compose.yml     # Docker service orchestration
+├── requirements.txt       # Python dependencies
+├── main.py               # Application entry point
 ├── telegram_bot/
-│   ├── handler.py             # Handles interactions with users
-│   └── message_formatter.py   # Formats messages and responses
-├── amazon_api/
-│   ├── client.py              # Amazon API calls (region-specific handling)
-│   └── product_selector.py    # Logic to filter and compare product listings
+│   ├── handler.py        # Telegram bot command handlers
+│   └── message_formatter.py  # Response formatting
+├── marketplaces/
+│   ├── amazon/           # Amazon integration via Apify
+│   ├── temu/            # Temu marketplace integration
+│   ├── jumia/           # Jumia marketplace integration
+│   └── alibaba/         # Alibaba marketplace integration
 ├── utils/
-│   └── scoring.py             # Scoring algorithm for best deal selection
+│   ├── scoring.py       # Deal scoring algorithms
+│   └── marketplace_manager.py  # Marketplace coordination
 └── config/
-    └── settings.py           # Store Amazon API credentials and settings
+    └── settings.py      # Configuration management
 ```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m "feat: add amazing feature"`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
