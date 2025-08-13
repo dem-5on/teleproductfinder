@@ -13,8 +13,8 @@ class TemuClient(MarketplaceClient):
             "searchQueries": [search_query],
             "maxItems": 20,
             "getReviews": True,
-            "saveImages": False,  # Skip images to improve performance
-            "saveVideos": False   # Skip videos to improve performance
+            "saveImages": False,
+            "saveVideos": False
         }
 
     def _process_item(self, item):
@@ -47,6 +47,7 @@ class TemuClient(MarketplaceClient):
         url = (item.get('url') or 
                item.get('productUrl') or
                item.get('link') or
+               item.get('link_url') or
                '')
                
         if not url and (product_id := (item.get('id') or item.get('productId'))):
@@ -85,7 +86,7 @@ class TemuClient(MarketplaceClient):
             'rating': rating,
             'review_count': review_count,
             'shipping': shipping,
-            'seller': 'Temu'  # Default to Temu as seller
+            'seller': 'Temu seller'
         }
 
 class JumiaClient(MarketplaceClient):
@@ -94,18 +95,22 @@ class JumiaClient(MarketplaceClient):
 
     def _prepare_actor_input(self, search_query):
         return {
-            "search": search_query,
+            "searchUrls": search_query,
             "maxProducts": 20,
-            "country": "kenya"  # Can be made configurable
+            "country": "kenya"
         }
 
     def _process_item(self, item):
-        title = item.get('name', '')
+        title = (item.get('name') or 
+                 item.get('productName') or 
+                 item.get('displayName') or
+                 item.get('product_name') or 
+                 '')
         if not title:
             logger.debug("Skipping Jumia product with no title")
             return None
 
-        price = item.get('price', 'N/A')
+        price = item.get('prices', 'N/A')
         url = item.get('url', '')
 
         if not url:
@@ -134,7 +139,11 @@ class AlibabaClient(MarketplaceClient):
         }
 
     def _process_item(self, item):
-        title = item.get('title', '')
+        title = (item.get('title') or 
+                 item.get('name') or 
+                 item.get('productName') or 
+                 item.get('product_name') or 
+                 '')
         if not title:
             logger.debug("Skipping Alibaba product with no title")
             return None
@@ -142,15 +151,21 @@ class AlibabaClient(MarketplaceClient):
         # Alibaba often has price ranges
         min_price = item.get('minPrice')
         max_price = item.get('maxPrice')
-        price = f"${min_price}" if min_price == max_price else f"${min_price}-${max_price}"
-        
-        url = item.get('detailUrl', '')
+        if min_price is None and max_price is None:
+            price = item.get('price')
+        else:
+            price = f"${min_price}" if min_price == max_price else f"${min_price}-${max_price}"
+
+        url = item.get('productUrl', '')
 
         if not url:
             logger.debug(f"Skipping Alibaba product missing URL: {title}")
             return None
 
-        review_data = self._process_review_data(item)
+        reviewScore = item.get('reviewScore', 0)
+        reviewCount = item.get('reviewCount', 0)
+        review_data = {'rating': reviewScore, 'reviews_count': reviewCount} if reviewScore and reviewCount else {}
+        # review_data = self._process_review_data(item)
 
         return {
             'title': title,

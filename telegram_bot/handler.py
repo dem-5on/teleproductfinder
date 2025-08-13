@@ -112,13 +112,19 @@ class BestDealHandler:
                 for marketplace, products in results.items():
                     if products:
                         best_product = max(products, key=lambda x: float(x.get('rating', 0) or 0))
+                        message, url = format_product_message(best_product)
                         messages.append(f"\n🏪 {self.marketplace_manager.get_marketplace_display_name(marketplace)}:")
-                        messages.append(format_product_message(best_product))
+                        messages.append(message)
+                        if url:
+                            keyboard = [[InlineKeyboardButton("View Product", url=url)]]
+                            reply_markup = InlineKeyboardMarkup(keyboard)
+                            await update.message.reply_text(
+                                text=message,
+                                reply_markup=reply_markup,
+                                parse_mode="Markdown"
+                            )
                 
-                await status_message.edit_text(
-                    "\n".join(messages),
-                    parse_mode="Markdown"
-                )
+                await status_message.delete()
                 
             else:
                 marketplace = context.user_data.get('marketplace')
@@ -133,8 +139,16 @@ class BestDealHandler:
                 
                 # Get best product based on rating
                 best_product = max(products, key=lambda x: float(x.get('rating', 0) or 0))
+                message, url = format_product_message(best_product)
+                
+                reply_markup = None
+                if url:
+                    keyboard = [[InlineKeyboardButton("View Product", url=url)]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+
                 await status_message.edit_text(
-                    format_product_message(best_product),
+                    message,
+                    reply_markup=reply_markup,
                     parse_mode="Markdown"
                 )
                 

@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 class MarketplaceClient(ABC):
     def __init__(self, actor_id):
-        self.client = ApifyClient(settings.AMAZON_APIFY_API_TOKEN)
+        logger.debug(f"Initializing client for actor {actor_id} with token: {settings.APIFY_API_TOKEN}")
+        self.client = ApifyClient(settings.APIFY_API_TOKEN)
         self.actor_id = actor_id
 
     @abstractmethod
