@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class AmazonClient:
     def __init__(self, region="com"):
         self.region = region
-        self.client = ApifyClient(settings.AMAZON_APIFY_API_TOKEN)
+        self.client = ApifyClient(settings.APIFY_API_TOKEN)
 
     def _process_review_data(self, item):
         """
