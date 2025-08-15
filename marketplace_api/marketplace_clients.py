@@ -174,3 +174,66 @@ class AlibabaClient(MarketplaceClient):
             'marketplace': 'Alibaba',
             **review_data
         }
+
+class AliExpressClient(MarketplaceClient):
+    def __init__(self):
+        super().__init__("epctex/aliexpress-scraper")
+
+    def _prepare_actor_input(self, search_query):
+        return {
+            "startUrls": [f"https://www.aliexpress.com/wholesale?SearchText={search_query.replace(' ', '+')}"],
+            "maxItems": 20
+        }
+    def _process_item(self, item):
+        title = (item.get('title') or 
+                 item.get('name') or 
+                 item.get('productName') or 
+                 item.get('product_name') or 
+                 '')
+        if not title:
+            logger.debug("Skipping AliExpress product with no title")
+            return None
+
+        # Handle price
+        price = item.get('price')
+        if not price:
+            price = item.get('salePrice') or item.get('originalPrice') or 'N/A'
+        
+        if price != 'N/A' and not str(price).startswith('$'):
+            price = f"${price}"
+
+        url = item.get('productUrl') or item.get('url') or ''
+        if not url:
+            logger.debug(f"Skipping AliExpress product missing URL: {title}")
+            return None
+
+        # Process rating and reviews
+        rating = item.get('rating', 0)
+        if isinstance(rating, str):
+            try:
+                rating = float(rating)
+            except ValueError:
+                rating = 0
+
+        review_count = item.get('reviewCount', 0) or item.get('reviews', 0)
+        if isinstance(review_count, str):
+            try:
+                review_count = int(review_count)
+            except ValueError:
+                review_count = 0
+
+        # Handle shipping
+        shipping = item.get('shipping', 'N/A')
+        if isinstance(shipping, dict):
+            shipping = shipping.get('time', 'N/A')
+
+        return {
+            'title': title,
+            'price': price,
+            'url': url,
+            'marketplace': 'AliExpress',
+            'rating': rating,
+            'review_count': review_count,
+            'shipping': shipping,
+            'seller': item.get('store', {}).get('name', 'AliExpress seller') if isinstance(item.get('store'), dict) else 'AliExpress seller'
+        }

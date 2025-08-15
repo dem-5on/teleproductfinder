@@ -209,7 +209,7 @@ class BestDealHandler:
                     return MAIN_MENU
                 
                 # Format and send results
-                await status_message.edit_text("✅ Found great deals! Here are the best products:")
+                # await status_message.edit_text("✅ Found great deals! Here are the best products:")
                 
                 for marketplace, products in results.items():
                     if products:

@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 import logging
 from .amazon_client import AmazonClient
-from .marketplace_clients import TemuClient, JumiaClient, AlibabaClient
+from .marketplace_clients import TemuClient, JumiaClient, AlibabaClient, AliExpressClient
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,8 @@ class MarketplaceManager:
         'amazon': 'Amazon',
         'temu': 'Temu',
         'jumia': 'Jumia',
-        'alibaba': 'Alibaba'
+        'alibaba': 'Alibaba',
+        'aliexpress': 'AliExpress'
     }
 
     def __init__(self):
@@ -18,7 +19,8 @@ class MarketplaceManager:
             'amazon': AmazonClient(),
             'temu': TemuClient(),
             'jumia': JumiaClient(),
-            'alibaba': AlibabaClient()
+            'alibaba': AlibabaClient(),
+            'aliexpress': AliExpressClient()
         }
     
     def get_available_marketplaces(self):
@@ -56,6 +58,9 @@ class MarketplaceManager:
             client.region = region
 
         if marketplace == 'alibaba' and region:
+            client.region = region
+
+        if marketplace == 'aliexpress' and region:
             client.region = region
 
         results = client.search_products(product_name)

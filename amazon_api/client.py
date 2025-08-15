@@ -1,7 +1,6 @@
 from apify_client import ApifyClient
 import logging
 import httpx
-
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -43,17 +42,16 @@ class AmazonClient:
             
             run_input = {
                 "categoryOrProductUrls": [{"url": search_url}],
-                "maxItemsPerStartUrl": 20,  # Limit to 20 items for faster response
+                "maxItemsPerStartUrl": 20,
                 "proxyCountry": "AUTO_SELECT_PROXY_COUNTRY",
                 "maxOffers": 0,
                 "scrapeSellers": False,
-                # Disable enhanced content scraping to avoid non-critical warnings
                 "ensureLoadedProductDescriptionFields": False,
                 "useCaptchaSolver": False,
                 "scrapeProductVariantPrices": False,
-                "scrapeProductDetails": False,  # Changed to false to avoid A+ content errors
+                "scrapeProductDetails": False,
                 "locationDeliverableRoutes": [
-                    "SEARCH",  # Only search results needed
+                    "SEARCH",
                 ],
             }
 
