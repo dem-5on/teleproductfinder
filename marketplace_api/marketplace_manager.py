@@ -1,7 +1,5 @@
 from typing import List, Dict, Any
 import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
 from .amazon_client import AmazonClient
 from .marketplace_clients import TemuClient, JumiaClient, AlibabaClient
 
@@ -51,6 +49,15 @@ class MarketplaceManager:
         if marketplace == 'amazon' and region:
             client.region = region
             
+        if marketplace == 'temu' and region:
+            client.region = region
+
+        if marketplace == 'jumia' and region:
+            client.region = region
+
+        if marketplace == 'alibaba' and region:
+            client.region = region
+
         results = client.search_products(product_name)
         # Add marketplace name to each result
         for result in results:

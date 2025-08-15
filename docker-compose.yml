@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - AMAZON_APIFY_API_TOKEN=${AMAZON_APIFY_API_TOKEN}
+      - APIFY_API_TOKEN=${APIFY_API_TOKEN}
     volumes:
       # Mount logs directory for persistence
       - ./logs:/app/logs
